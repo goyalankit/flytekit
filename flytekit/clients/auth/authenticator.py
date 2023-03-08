@@ -176,8 +176,7 @@ class ClientCredentialsAuthenticator(Authenticator):
         self._verify = verify
         super().__init__(endpoint, cfg.header_key or header_key)
 
-    @staticmethod
-    def get_token(token_endpoint: str, authorization_header: str, scopes: typing.List[str]) -> typing.Tuple[str, int]:
+    def get_token(self, token_endpoint: str, authorization_header: str, scopes: typing.List[str]) -> typing.Tuple[str, int]:
         """
         :rtype: (Text,Int) The first element is the access token retrieved from the IDP, the second is the expiration
                 in seconds
