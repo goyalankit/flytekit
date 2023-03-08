@@ -56,12 +56,13 @@ def get_authenticator(cfg: PlatformConfig, cfg_store: ClientConfigStore) -> Auth
             logging.warning(f"Authentication type {cfg_auth} does not exist, defaulting to standard")
             cfg_auth = AuthType.STANDARD
 
+    verify = None
+    if cfg.insecure_skip_verify:
+        verify = False
+    elif cfg.ca_cert_file_path:
+        verify = cfg.ca_cert_file_path
+
     if cfg_auth == AuthType.STANDARD or cfg_auth == AuthType.PKCE:
-        verify = None
-        if cfg.insecure_skip_verify:
-            verify = False
-        elif cfg.ca_cert_file_path:
-            verify = cfg.ca_cert_file_path
         return PKCEAuthenticator(cfg.endpoint, cfg_store, verify=verify)
     elif cfg_auth == AuthType.BASIC or cfg_auth == AuthType.CLIENT_CREDENTIALS or cfg_auth == AuthType.CLIENTSECRET:
         return ClientCredentialsAuthenticator(
@@ -69,6 +70,7 @@ def get_authenticator(cfg: PlatformConfig, cfg_store: ClientConfigStore) -> Auth
             client_id=cfg.client_id,
             client_secret=cfg.client_credentials_secret,
             cfg_store=cfg_store,
+            verify=verify
         )
     elif cfg_auth == AuthType.EXTERNAL_PROCESS or cfg_auth == AuthType.EXTERNALCOMMAND:
         client_cfg = None

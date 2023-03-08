@@ -164,6 +164,7 @@ class ClientCredentialsAuthenticator(Authenticator):
         client_secret: str,
         cfg_store: ClientConfigStore,
         header_key: str = None,
+        verify: typing.Optional[typing.Union[bool, str]] = None,
     ):
         if not client_id or not client_secret:
             raise ValueError("Client ID and Client SECRET both are required.")
@@ -172,6 +173,7 @@ class ClientCredentialsAuthenticator(Authenticator):
         self._scopes = cfg.scopes
         self._client_id = client_id
         self._client_secret = client_secret
+        self._verify = verify
         super().__init__(endpoint, cfg.header_key or header_key)
 
     @staticmethod
@@ -191,7 +193,7 @@ class ClientCredentialsAuthenticator(Authenticator):
         }
         if scopes is not None:
             body["scope"] = ",".join(scopes)
-        response = requests.post(token_endpoint, data=body, headers=headers)
+        response = requests.post(token_endpoint, data=body, headers=headers, verify=self._verify)
         if response.status_code != 200:
             logging.error("Non-200 ({}) received from IDP: {}".format(response.status_code, response.text))
             raise AuthenticationError("Non-200 received from IDP")
